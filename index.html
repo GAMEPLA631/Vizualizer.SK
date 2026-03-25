@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonicViz Ultra | Next-Gen Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #f093fb;
+            --viz-green: #00ff42;
+            --bg: #020202;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            overflow-x: hidden;
+            letter-spacing: -0.01em;
+        }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        .gradient-border {
+            position: relative;
+            background: var(--glass);
+            border-radius: 1.5rem;
+            z-index: 1;
+        }
+
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.5rem;
+            padding: 1px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .gradient-text {
+            background-image: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            font-weight: 800;
+        }
+
+        #visualizer-canvas {
+            image-rendering: auto;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        #hidden-bg-video, #hidden-bg-img { display: none; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: black;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.5);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .rec-dot {
+            width: 10px; height: 10px;
+            background: #ff3e3e; border-radius: 50%;
+            animation: pulse-red 1s infinite;
+            box-shadow: 0 0 10px #ff3e3e;
+        }
+
+        .premium-tag {
+            background: linear-gradient(45deg, #fceabb, #f8b500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            font-size: 0.75rem; font-weight: 900;
+            letter-spacing: 0.15em;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+            border: none;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="custom-scrollbar">
+
+    <nav class="fixed top-0 w-full z-[100] px-8 py-5 flex justify-between items-center glass-panel border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="relative group cursor-pointer" onclick="showSection('studio')">
+                <div class="absolute -inset-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg blur opacity-20 group-hover:opacity-60 transition duration-700"></div>
+                <div class="relative w-12 h-12 bg-black rounded-xl flex items-center justify-center border border-white/10">
+                    <i class="fas fa-layer-group text-cyan-400 text-xl"></i>
+                </div>
+            </div>
+            <div>
+                <span class="text-2xl font-black tracking-tighter uppercase leading-none block">SonicViz <span class="text-cyan-400">Ultra</span></span>
+                <span class="text-[9px] uppercase tracking-[0.3em] text-gray-500 font-bold">The Peak Performance</span>
+            </div>
+        </div>
+        
+        <div class="hidden lg:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
+            <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('studio')">Studio</a>
+            <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('marketplace')">Styles Lab</a>
+            <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('pricing')">Licensing</a>
+        </div>
+
+        <div class="flex items-center gap-5">
+            <div id="premium-status-indicator" class="hidden items-center gap-2 glass-panel px-5 py-2.5 rounded-full border-yellow-500/20">
+                <i class="fas fa-crown text-yellow-500 text-xs shadow-sm"></i>
+                <span class="premium-tag">ULTRA ACCESS</span>
+            </div>
+            <button id="upgrade-btn-nav" onclick="showSection('pricing')" class="btn-primary px-8 py-3 rounded-2xl text-[11px] uppercase tracking-widest">
+                Unlock Pro
+            </button>
+        </div>
+    </nav>
+
+    <main class="pt-28 min-h-screen px-8 pb-12">
+        <section id="studio-section" class="max-w-[1700px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
+            <div class="xl:col-span-3 space-y-8">
+                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+                    <div class="flex items-center gap-5 mb-8">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 flex items-center justify-center">
+                            <i class="fas fa-user-astronaut text-cyan-400 text-2xl"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="text-base font-black uppercase tracking-tight truncate">Sound Architect</h4>
+                            <p id="premium-expiry-display" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Standard Tier</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Parameters & NEW Audio Processing -->
+                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 space-y-8">
+                    <div class="space-y-6">
+                        <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Visual & Audio Engine</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase block mb-3">Accent Color</label>
+                                <div class="flex items-center gap-4">
+                                    <input type="color" id="viz-color-picker" value="#00ff42">
+                                    <span id="color-hex" class="text-[10px] font-mono text-gray-500 uppercase">#00ff42</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-3">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Sphere Scale</label>
+                                    <span id="scale-val" class="text-[10px] font-mono text-cyan-400">1.00x</span>
+                                </div>
+                                <input type="range" id="viz-scale-slider" min="0.5" max="2.5" step="0.05" value="1.0">
+                            </div>
+
+                            <div class="pt-4 border-t border-white/5">
+                                <div class="flex justify-between mb-3">
+                                    <label class="text-[10px] font-bold text-yellow-500 uppercase">Ultra Bass Boost</label>
+                                    <span id="bass-val" class="text-[10px] font-mono text-yellow-500">+0 dB</span>
+                                </div>
+                                <input type="range" id="bass-boost-slider" min="0" max="20" step="1" value="0">
+                                <p class="text-[9px] text-gray-500 mt-2 italic leading-tight">Zosilňuje sub-frekvencie pomocou Low-Shelf filtra v reálnom čase.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gradient-border p-8 space-y-6">
+                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Materiály</h3>
+                    <label class="group relative block w-full cursor-pointer bg-white/[0.03] border border-white/10 hover:border-cyan-400/50 p-10 rounded-3xl text-center transition-all duration-700">
+                        <i class="fas fa-cloud-arrow-up text-3xl mb-4 text-cyan-400"></i>
+                        <span class="block text-[11px] font-bold text-gray-300 uppercase tracking-widest">Nahrať Médiá</span>
+                        <input type="file" id="file-input" class="hidden" accept="audio/*,video/*,image/*">
+                    </label>
+                </div>
+
+                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5">
+                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em] mb-6">Visual Style</h3>
+                    <select id="viz-style" class="w-full bg-black/60 border border-white/10 p-4 rounded-2xl text-xs focus:outline-none focus:border-cyan-500 transition-all font-bold uppercase tracking-widest">
+                        <option value="circle">Neon Horizon (Circle)</option>
+                        <option value="bars">Matrix Pulse (Bars)</option>
+                        <optgroup label="PRO ULTRA MODES (MATCHED TO IMAGE)">
+                            <option value="pro-ultra-circle" selected>PRO Green Nebula (Sphere)</option>
+                            <option value="pro-triangle">PRO Sacred Geometry</option>
+                            <option value="cyber">Cyberpunk Relay</option>
+                            <option value="vapor">Synthwave Sun</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5">
+                    <button id="record-btn" onclick="toggleRecording()" class="w-full flex items-center justify-center gap-4 py-5 bg-white/5 hover:bg-red-500/15 border border-white/10 rounded-2xl transition-all duration-500">
+                        <i class="fas fa-circle text-gray-600"></i>
+                        <span class="text-[12px] font-black uppercase tracking-[0.25em]">Execute Render</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="xl:col-span-9 space-y-8">
+                <div id="capture-area" class="relative w-full aspect-video rounded-[3.5rem] overflow-hidden bg-black shadow-2xl border border-white/10">
+                    <video id="hidden-bg-video" loop muted crossorigin="anonymous"></video>
+                    <img id="hidden-bg-img" crossorigin="anonymous">
+                    <canvas id="visualizer-canvas" class="w-full h-full relative z-10"></canvas>
+
+                    <div id="recording-status" class="hidden absolute top-12 left-12 z-20 flex items-center gap-4 bg-black/70 backdrop-blur-xl px-6 py-3 rounded-full border border-red-500/40 shadow-2xl">
+                        <div class="rec-dot"></div>
+                        <span class="text-[11px] font-black uppercase tracking-[0.25em] text-red-500">Rendering...</span>
+                    </div>
+
+                    <div class="absolute inset-x-0 bottom-12 z-20 flex justify-center items-center">
+                        <div class="glass-panel px-14 py-8 rounded-[3rem] border border-white/10 flex items-center gap-12">
+                            <button onclick="togglePlay()" class="text-5xl text-white hover:text-cyan-400 transition-all transform hover:scale-110">
+                                <i id="play-icon" class="fas fa-play"></i>
+                            </button>
+                            <div class="flex flex-col gap-3">
+                                <div class="relative w-96 h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div id="progress" class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-400 to-indigo-600 w-0"></div>
+                                </div>
+                                <div class="flex justify-between font-mono text-[10px] font-black text-gray-500 uppercase">
+                                    <span id="time-current">00:00:00</span>
+                                    <span id="time-total">00:00:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-8 text-center uppercase">
+                    <div class="glass-panel p-6 rounded-3xl">
+                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Audio Quality</span>
+                        <span class="text-xs font-mono font-bold text-yellow-500">HD PROCESSING</span>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl">
+                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Dynamics Control</span>
+                        <span class="text-xs font-mono font-bold text-cyan-400">STUDIO COMPRESSOR</span>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl">
+                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Engine Latency</span>
+                        <span class="text-xs font-mono font-bold text-green-400">LATENCY FREE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Marketplace & Pricing Sections -->
+        <section id="marketplace-section" class="hidden max-w-7xl mx-auto py-24 text-center">
+            <h2 class="text-6xl font-black uppercase mb-12">The <span class="gradient-text">Styles Lab</span></h2>
+            <div id="packages-grid" class="grid grid-cols-2 md:grid-cols-5 gap-8"></div>
+        </section>
+
+        <section id="pricing-section" class="hidden max-w-[1400px] mx-auto py-24 text-center">
+            <h2 class="text-7xl font-black uppercase mb-16">The <span class="gradient-text">Licensing</span></h2>
+            <div class="grid md:grid-cols-3 gap-16">
+                <div class="glass-panel p-12 rounded-[3.5rem] opacity-50">
+                    <h3 class="text-xl font-black mb-12 uppercase">Trainee</h3>
+                    <div class="text-6xl font-black">€0</div>
+                </div>
+                <div class="gradient-border p-14 scale-110 shadow-2xl">
+                    <h3 class="text-2xl font-black text-cyan-400 mb-12 uppercase">Ultra Artist</h3>
+                    <div class="text-7xl font-black">€19</div>
+                    <button onclick="openModal('payment-modal')" class="w-full py-6 btn-primary rounded-3xl mt-12 uppercase font-black">Get Ultra Access</button>
+                </div>
+                <div class="glass-panel p-12 rounded-[3.5rem]">
+                    <h3 class="text-xl font-black mb-12 uppercase">Agency</h3>
+                    <div class="text-6xl font-black">€49</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="payment-modal" class="modal-overlay">
+        <div class="glass-panel p-16 rounded-[4.5rem] max-w-2xl w-full mx-4 relative border border-white/10">
+            <button onclick="closeModal('payment-modal')" class="absolute top-12 right-12 text-gray-500 hover:text-white transition-all"><i class="fas fa-times text-3xl"></i></button>
+            <div class="text-center mb-16">
+                <h2 class="text-5xl font-black uppercase tracking-tighter mb-4">Secure <span class="gradient-text">Studio Link</span></h2>
+                <p class="text-[11px] text-gray-500 uppercase font-bold tracking-widest">Authorized Transaction via IDB</p>
+            </div>
+            <div class="space-y-8 text-center">
+                <input type="text" placeholder="Identity Card Number" class="bg-white/5 w-full p-8 rounded-[2rem] text-2xl outline-none font-mono tracking-widest border border-white/5 focus:border-cyan-400 transition-colors">
+                <button onclick="handleIDBPremiumPurchase()" class="w-full py-8 btn-primary rounded-[2.5rem] font-black text-2xl uppercase tracking-widest">Unlock Studio Features</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-12 right-12 glass-panel px-12 py-8 rounded-[3rem] hidden transform translate-y-40 transition-all duration-700 flex items-center gap-8 z-[2000] border border-white/10">
+        <div id="toast-icon" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"></div>
+        <div id="toast-msg" class="font-black text-sm uppercase"></div>
+    </div>
+
+    <script>
+        const DB_NAME = 'SonicVizUltraDB';
+        const STORE_NAME = 'metaData';
+        let db;
+
+        async function initIndexedDB() {
+            return new Promise((resolve) => {
+                const req = indexedDB.open(DB_NAME, 5);
+                req.onupgradeneeded = (e) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+                };
+                req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+            });
+        }
+
+        async function getFromDB(key) {
+            return new Promise((r) => {
+                const tx = db.transaction([STORE_NAME], 'readonly');
+                const req = tx.objectStore(STORE_NAME).get(key);
+                req.onsuccess = () => r(req.result);
+                req.onerror = () => r(null);
+            });
+        }
+
+        async function saveToDB(key, val) {
+            return new Promise((r) => {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const req = tx.objectStore(STORE_NAME).put(val, key);
+                req.onsuccess = () => r(true);
+            });
+        }
+
+        // State Variables
+        let isPremium = false, 
+            audioContext, analyser, dataArray, source, audioStreamDest, 
+            isPlaying = false, animationId, mediaRecorder, recordedChunks = [], 
+            isRecording = false, bgType = 'none';
+
+        // Customization State
+        let vizColor = '#00ff42';
+        let vizScale = 1.0;
+        let bassGain = 0; // dB
+
+        // Audio Nodes for Enhancement
+        let bassFilter, compressor;
+
+        const canvas = document.getElementById('visualizer-canvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('file-input');
+        const hiddenVideo = document.getElementById('hidden-bg-video');
+        const hiddenImg = document.getElementById('hidden-bg-img');
+        const colorPicker = document.getElementById('viz-color-picker');
+        const scaleSlider = document.getElementById('viz-scale-slider');
+        const bassSlider = document.getElementById('bass-boost-slider');
+        const audio = new Audio(); audio.crossOrigin = "anonymous";
+
+        window.onload = async () => {
+            await initIndexedDB();
+            await syncPremiumStatus();
+            await loadStudioSettings();
+            initLabItems();
+            resizeCanvas();
+            drawLoop();
+            setInterval(syncPremiumStatus, 30000);
+        };
+
+        async function loadStudioSettings() {
+            const settings = await getFromDB('visualSettings');
+            if (settings) {
+                vizColor = settings.color || '#00ff42';
+                vizScale = settings.scale || 1.0;
+                bassGain = settings.bassGain || 0;
+                
+                colorPicker.value = vizColor;
+                document.getElementById('color-hex').innerText = vizColor;
+                scaleSlider.value = vizScale;
+                document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
+                bassSlider.value = bassGain;
+                document.getElementById('bass-val').innerText = `+${bassGain} dB`;
+            }
+        }
+
+        async function saveStudioSettings() {
+            await saveToDB('visualSettings', { color: vizColor, scale: vizScale, bassGain: bassGain });
+        }
+
+        colorPicker.oninput = (e) => {
+            vizColor = e.target.value;
+            document.getElementById('color-hex').innerText = vizColor;
+            saveStudioSettings();
+        };
+
+        scaleSlider.oninput = (e) => {
+            vizScale = parseFloat(e.target.value);
+            document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
+            saveStudioSettings();
+        };
+
+        bassSlider.oninput = (e) => {
+            bassGain = parseFloat(e.target.value);
+            document.getElementById('bass-val').innerText = `+${bassGain} dB`;
+            if (bassFilter) bassFilter.gain.value = bassGain;
+            saveStudioSettings();
+        };
+
+        async function syncPremiumStatus() {
+            const profile = await getFromDB('userProfile');
+            const now = Date.now();
+            const ind = document.getElementById('premium-status-indicator');
+            const exp = document.getElementById('premium-expiry-display');
+            const upg = document.getElementById('upgrade-btn-nav');
+
+            if (profile && profile.isPremium && profile.expiryDate > now) {
+                isPremium = true; ind.classList.remove('hidden'); upg.classList.add('hidden');
+                exp.innerText = `Access Until: ${new Date(profile.expiryDate).toLocaleDateString()}`;
+                exp.classList.add('text-cyan-400');
+            } else {
+                if (profile && profile.isPremium) {
+                    profile.isPremium = false; await saveToDB('userProfile', profile);
+                    showToast("SESSION EXPIRED", "error");
+                }
+                isPremium = false; ind.classList.add('hidden'); upg.classList.remove('hidden');
+                exp.innerText = "Standard Tier"; exp.classList.remove('text-cyan-400');
+            }
+        }
+
+        window.handleIDBPremiumPurchase = async () => {
+            const btn = event.target; btn.innerText = "Processing..."; btn.disabled = true;
+            setTimeout(async () => {
+                const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                await saveToDB('userProfile', { isPremium: true, expiryDate: expiry });
+                await syncPremiumStatus();
+                closeModal('payment-modal');
+                showToast("STUDIO UPGRADE SUCCESSFUL", "success");
+                btn.innerText = "establish connection"; btn.disabled = false;
+            }, 2000);
+        };
+
+        window.onresize = resizeCanvas;
+        window.showSection = (id) => {
+            ['studio-section', 'marketplace-section', 'pricing-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id + '-section').classList.remove('hidden');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        };
+        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+        function resizeCanvas() {
+            const container = document.getElementById('capture-area');
+            if (container) {
+                const dpr = window.devicePixelRatio || 2;
+                canvas.width = container.clientWidth * dpr;
+                canvas.height = container.clientHeight * dpr;
+                ctx.scale(dpr, dpr);
+            }
+        }
+
+        function initLabItems() {
+            const grid = document.getElementById('packages-grid'); if (!grid) return;
+            for(let i=1; i<=30; i++) {
+                const div = document.createElement('div');
+                div.className = 'glass-panel p-10 rounded-[3rem] flex flex-col items-center cursor-pointer hover:-translate-y-2 transition-all';
+                div.innerHTML = `<div class="w-full aspect-square rounded-3xl mb-8 bg-white/5 flex items-center justify-center border border-white/5"><i class="fas fa-wave-square text-3xl text-cyan-500/20"></i></div><h4 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-widest">Preset #${i}</h4><span class="text-white text-2xl font-black">€${(Math.random() * 20 + 10).toFixed(2)}</span>`;
+                grid.appendChild(div);
+            }
+        }
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const url = URL.createObjectURL(file);
+            if (file.type.startsWith('audio/')) { audio.src = url; showToast("HD AUDIO LOADED", "success"); }
+            else if (file.type.startsWith('video/')) { hiddenVideo.src = url; bgType = 'video'; hiddenVideo.play(); showToast("VIDEO WRAPPER SET", "success"); }
+            else if (file.type.startsWith('image/')) { hiddenImg.src = url; bgType = 'image'; showToast("OPTICAL LAYER READY", "success"); }
+            if (!audioContext) initStudioEngine();
+        };
+
+        function initStudioEngine() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 1. Source
+            source = audioContext.createMediaElementSource(audio);
+            
+            // 2. Bass Boost Filter (Low Shelf at 200Hz)
+            bassFilter = audioContext.createBiquadFilter();
+            bassFilter.type = 'lowshelf';
+            bassFilter.frequency.value = 200;
+            bassFilter.gain.value = bassGain;
+
+            // 3. Studio Compressor (Prevents distortion)
+            compressor = audioContext.createDynamicsCompressor();
+            compressor.threshold.setValueAtTime(-24, audioContext.currentTime);
+            compressor.knee.setValueAtTime(40, audioContext.currentTime);
+            compressor.ratio.setValueAtTime(12, audioContext.currentTime);
+            compressor.attack.setValueAtTime(0, audioContext.currentTime);
+            compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+
+            // 4. Analyser
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 512;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            // 5. Recorder Destination
+            audioStreamDest = audioContext.createMediaStreamDestination();
+
+            // CONNECT NODES: Source -> Bass -> Compressor -> Analyser -> Output
+            // Also connect to recorder
+            source.connect(bassFilter);
+            bassFilter.connect(compressor);
+            compressor.connect(analyser);
+            analyser.connect(audioContext.destination);
+            analyser.connect(audioStreamDest);
+        }
+
+        window.togglePlay = () => {
+            if (!audio.src) return showToast("CHÝBA MÉDIUM", "error");
+            if (audioContext?.state === 'suspended') audioContext.resume();
+            if (isPlaying) audio.pause(); else audio.play();
+            isPlaying = !isPlaying;
+            document.getElementById('play-icon').className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        };
+
+        audio.ontimeupdate = () => {
+            document.getElementById('progress').style.width = (audio.currentTime / audio.duration) * 100 + '%';
+            document.getElementById('time-current').innerText = formatTime(audio.currentTime);
+        };
+        audio.onloadedmetadata = () => document.getElementById('time-total').innerText = formatTime(audio.duration);
+        audio.onended = () => { if (isRecording) stopRecording(); isPlaying = false; document.getElementById('play-icon').className = 'fas fa-play'; };
+
+        function formatTime(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = Math.floor(s % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        window.toggleRecording = () => {
+            if (!audio.src) return showToast("RENDER CHYBA: ŽIADNY ZVUK", "error");
+            if (!isRecording) startRecording(); else stopRecording();
+        };
+
+        function startRecording() {
+            isRecording = true; recordedChunks = [];
+            const combined = new MediaStream([...canvas.captureStream(60).getVideoTracks(), ...audioStreamDest.stream.getAudioTracks()]);
+            mediaRecorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9,opus' });
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }));
+                a.download = `SonicUltra_Studio_Render_${Date.now()}.webm`; a.click();
+                showToast("STUDIO RENDER COMPLETE", "success");
+            };
+            mediaRecorder.start();
+            document.getElementById('recording-status').classList.remove('hidden');
+            document.getElementById('record-btn').classList.add('bg-red-500/15', 'border-red-500/30');
+            if (!isPlaying) togglePlay();
+        }
+
+        function stopRecording() {
+            isRecording = false; if (mediaRecorder) mediaRecorder.stop();
+            document.getElementById('recording-status').classList.add('hidden');
+            document.getElementById('record-btn').classList.remove('bg-red-500/15', 'border-red-500/30');
+        }
+
+        function drawLoop() {
+            animationId = requestAnimationFrame(drawLoop);
+            if(analyser) analyser.getByteFrequencyData(dataArray);
+
+            const dpr = window.devicePixelRatio || 2;
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+            const centerX = w / 2;
+            const centerY = h / 2;
+
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#020202";
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.save();
+            ctx.globalAlpha = 0.90; 
+            if (bgType === 'video' && hiddenVideo.readyState >= 2) ctx.drawImage(hiddenVideo, 0, 0, w, h);
+            else if (bgType === 'image' && hiddenImg.complete) ctx.drawImage(hiddenImg, 0, 0, w, h);
+            ctx.restore();
+
+            if(!analyser) return;
+
+            const style = document.getElementById('viz-style').value;
+            if (style.startsWith('pro-') && !isPremium) {
+                ctx.fillStyle = "rgba(0,0,0,0.96)"; ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = "#00f2fe"; ctx.font = "900 36px 'Plus Jakarta Sans'"; ctx.textAlign = "center";
+                ctx.fillText("UNLOCK STUDIO ACCESS", centerX, centerY);
+                return;
+            }
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+
+            if (style === 'pro-ultra-circle') {
+                const bassValue = (dataArray[1] + dataArray[2] + dataArray[3]) / 3;
+                const bassResponse = (bassValue / 255) * 60;
+                const baseRadius = (180 * vizScale) + bassResponse;
+                
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = vizColor;
+                ctx.strokeStyle = vizColor;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2);
+                ctx.stroke();
+
+                for (let i = 0; i < dataArray.length; i += 2) {
+                    const angle = (i / dataArray.length) * Math.PI * 2 + (Date.now() / 2500);
+                    const magnitude = dataArray[i];
+                    for (let j = 0; j < 6; j++) {
+                        const jitterAngle = angle + (Math.random() - 0.5) * 0.15;
+                        const fuzzyLen = (magnitude / 255) * 140 * vizScale * Math.random();
+                        const startX = centerX + Math.cos(jitterAngle) * baseRadius;
+                        const startY = centerY + Math.sin(jitterAngle) * baseRadius;
+                        const endX = centerX + Math.cos(jitterAngle) * (baseRadius + fuzzyLen);
+                        const endY = centerY + Math.sin(jitterAngle) * (baseRadius + fuzzyLen);
+                        ctx.beginPath();
+                        ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
+                        ctx.strokeStyle = vizColor;
+                        ctx.globalAlpha = (Math.random() * 0.4) + 0.1;
+                        ctx.lineWidth = 1 + Math.random() * 1.5;
+                        ctx.stroke();
+                    }
+                }
+            } else if (style === 'pro-triangle') {
+                ctx.save(); ctx.translate(centerX, centerY);
+                const br = (220 * vizScale) + dataArray[2]/2; ctx.rotate(Date.now()/3000);
+                ctx.shadowBlur = 30; ctx.shadowColor = vizColor; ctx.lineWidth = 5;
+                for(let k=0; k<2; k++) {
+                    ctx.rotate(k * Math.PI/4); ctx.beginPath();
+                    for(let i=0; i<3; i++) {
+                        const a = (i*2*Math.PI)/3; const x = Math.cos(a)*br; const y = Math.sin(a)*br;
+                        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                    }
+                    ctx.closePath(); ctx.strokeStyle = k===0 ? vizColor : '#f093fb'; ctx.stroke();
+                }
+                ctx.restore();
+            } else if (style === 'circle') {
+                const r = 240 * vizScale; ctx.shadowBlur = 20; ctx.shadowColor = vizColor;
+                for(let i=0; i<dataArray.length; i++) {
+                    const bh = (dataArray[i]/255)*180*vizScale; const a = (i/dataArray.length)*Math.PI*2;
+                    const x1 = centerX+Math.cos(a)*r; const y1 = centerY+Math.sin(a)*r;
+                    const x2 = centerX+Math.cos(a)*(r+bh); const y2 = centerY+Math.sin(a)*(r+bh);
+                    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+                    ctx.strokeStyle = vizColor; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
+                }
+            } else {
+                const bw = (w/dataArray.length)*1.5;
+                for(let i=0; i<dataArray.length; i++) {
+                    const bh = (dataArray[i]/255)*(h * 0.45);
+                    ctx.fillStyle = vizColor; ctx.shadowBlur = 15; ctx.shadowColor = vizColor;
+                    ctx.fillRect(i*bw, h-bh, bw-3, bh);
+                }
+            }
+            ctx.restore();
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').innerText = msg;
+            icon.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${type==='success'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}`;
+            icon.innerHTML = `<i class="fas fa-${type==='success'?'check':'bolt-lightning'}"></i>`;
+            toast.classList.remove('hidden'); setTimeout(() => toast.classList.remove('translate-y-40'), 10);
+            setTimeout(() => { toast.classList.add('translate-y-40'); setTimeout(() => toast.classList.add('hidden'), 700); }, 4000);
+        }
+    </script>
+</body>
+</html>
