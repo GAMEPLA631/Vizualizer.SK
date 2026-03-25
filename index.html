@@ -25,6 +25,7 @@
             color: white;
             overflow-x: hidden;
             letter-spacing: -0.01em;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .glass-panel {
@@ -155,17 +156,64 @@
             cursor: pointer;
         }
         
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-        
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch {
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
         }
+
+        /* MOBILE APP MODE STYLES */
+        .app-mode-active #studio-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 2rem;
+        }
+
+        .app-mode-active .xl\:col-span-3 {
+            display: none; /* Skryje bočný panel v mobilnom režime */
+        }
+
+        .app-mode-active #capture-area {
+            max-width: 400px;
+            aspect-ratio: 9/16;
+            height: auto;
+            border-radius: 3rem;
+            border: 8px solid #1a1a1a;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,1);
+        }
+
+        .app-mode-active .xl\:col-span-9 {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-mode-active .hud-controls {
+            padding: 1.5rem 2rem !important;
+            gap: 1.5rem !important;
+            bottom: 2rem !important;
+        }
+
+        .app-mode-active .hud-progress {
+            width: 180px !important;
+        }
+
+        /* Plávajúce tlačidlo pre nastavenia v App režime */
+        #mobile-settings-trigger {
+            display: none;
+        }
+        .app-mode-active #mobile-settings-trigger {
+            display: flex;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
     </style>
 </head>
-<body class="custom-scrollbar">
+<body class="custom-scrollbar" id="main-body">
 
     <nav class="fixed top-0 w-full z-[100] px-8 py-5 flex justify-between items-center glass-panel border-b border-white/5">
         <div class="flex items-center gap-3">
@@ -175,7 +223,7 @@
                     <i class="fas fa-layer-group text-cyan-400 text-xl"></i>
                 </div>
             </div>
-            <div>
+            <div class="hidden sm:block">
                 <span class="text-2xl font-black tracking-tighter uppercase leading-none block">SonicViz <span class="text-cyan-400">Ultra</span></span>
                 <span class="text-[9px] uppercase tracking-[0.3em] text-gray-500 font-bold">The Peak Performance</span>
             </div>
@@ -187,20 +235,29 @@
             <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('pricing')">Licensing</a>
         </div>
 
-        <div class="flex items-center gap-5">
+        <div class="flex items-center gap-4">
+            <button onclick="toggleAppMode()" id="app-mode-btn" class="p-3 bg-white/5 border border-white/10 rounded-xl hover:text-cyan-400 transition-all group" title="Prepnúť do App režimu">
+                <i class="fas fa-mobile-screen-button text-lg group-hover:scale-110 transition"></i>
+            </button>
             <div id="premium-status-indicator" class="hidden items-center gap-2 glass-panel px-5 py-2.5 rounded-full border-yellow-500/20">
                 <i class="fas fa-crown text-yellow-500 text-xs shadow-sm"></i>
                 <span class="premium-tag">ULTRA ACCESS</span>
             </div>
-            <button id="upgrade-btn-nav" onclick="showSection('pricing')" class="btn-primary px-8 py-3 rounded-2xl text-[11px] uppercase tracking-widest">
-                Unlock Pro
+            <button id="upgrade-btn-nav" onclick="showSection('pricing')" class="btn-primary px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest">
+                Unlock
             </button>
         </div>
     </nav>
 
-    <main class="pt-28 min-h-screen px-8 pb-12">
+    <!-- Plávajúce nastavenia pre mobilný režim -->
+    <button id="mobile-settings-trigger" onclick="openMobileMenu()" class="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition active:scale-95">
+        <i class="fas fa-sliders text-xl"></i>
+    </button>
+
+    <main class="pt-28 min-h-screen px-8 pb-12 transition-all duration-700">
         <section id="studio-section" class="max-w-[1700px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
-            <div class="xl:col-span-3 space-y-8">
+            <!-- Bočné ovládanie (Desktop) -->
+            <div class="xl:col-span-3 space-y-8 sidebar-content">
                 <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden">
                     <div class="flex items-center gap-5 mb-8">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 flex items-center justify-center">
@@ -213,11 +270,9 @@
                     </div>
                 </div>
 
-                <!-- Visual Parameters & NEW Audio Processing -->
                 <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 space-y-8">
                     <div class="space-y-6">
                         <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Visual & Audio Engine</h3>
-                        
                         <div class="space-y-4">
                             <div>
                                 <label class="text-[10px] font-bold text-gray-400 uppercase block mb-3">Accent Color</label>
@@ -226,7 +281,6 @@
                                     <span id="color-hex" class="text-[10px] font-mono text-gray-500 uppercase">#00ff42</span>
                                 </div>
                             </div>
-                            
                             <div>
                                 <div class="flex justify-between mb-3">
                                     <label class="text-[10px] font-bold text-gray-400 uppercase">Sphere Scale</label>
@@ -234,14 +288,12 @@
                                 </div>
                                 <input type="range" id="viz-scale-slider" min="0.5" max="2.5" step="0.05" value="1.0">
                             </div>
-
                             <div class="pt-4 border-t border-white/5">
                                 <div class="flex justify-between mb-3">
                                     <label class="text-[10px] font-bold text-yellow-500 uppercase">Ultra Bass Boost</label>
                                     <span id="bass-val" class="text-[10px] font-mono text-yellow-500">+0 dB</span>
                                 </div>
                                 <input type="range" id="bass-boost-slider" min="0" max="20" step="1" value="0">
-                                <p class="text-[9px] text-gray-500 mt-2 italic leading-tight">Zosilňuje sub-frekvencie pomocou Low-Shelf filtra v reálnom čase.</p>
                             </div>
                         </div>
                     </div>
@@ -261,7 +313,7 @@
                     <select id="viz-style" class="w-full bg-black/60 border border-white/10 p-4 rounded-2xl text-xs focus:outline-none focus:border-cyan-500 transition-all font-bold uppercase tracking-widest">
                         <option value="circle">Neon Horizon (Circle)</option>
                         <option value="bars">Matrix Pulse (Bars)</option>
-                        <optgroup label="PRO ULTRA MODES (MATCHED TO IMAGE)">
+                        <optgroup label="PRO ULTRA MODES">
                             <option value="pro-ultra-circle" selected>PRO Green Nebula (Sphere)</option>
                             <option value="pro-triangle">PRO Sacred Geometry</option>
                             <option value="cyber">Cyberpunk Relay</option>
@@ -278,8 +330,9 @@
                 </div>
             </div>
 
-            <div class="xl:col-span-9 space-y-8">
-                <div id="capture-area" class="relative w-full aspect-video rounded-[3.5rem] overflow-hidden bg-black shadow-2xl border border-white/10">
+            <!-- Visualizer Core -->
+            <div class="xl:col-span-9 space-y-8 main-content-area">
+                <div id="capture-area" class="relative w-full aspect-video rounded-[3.5rem] overflow-hidden bg-black shadow-2xl border border-white/10 transition-all duration-700">
                     <video id="hidden-bg-video" loop muted crossorigin="anonymous"></video>
                     <img id="hidden-bg-img" crossorigin="anonymous">
                     <canvas id="visualizer-canvas" class="w-full h-full relative z-10"></canvas>
@@ -290,15 +343,15 @@
                     </div>
 
                     <div class="absolute inset-x-0 bottom-12 z-20 flex justify-center items-center">
-                        <div class="glass-panel px-14 py-8 rounded-[3rem] border border-white/10 flex items-center gap-12">
+                        <div class="glass-panel px-14 py-8 rounded-[3rem] border border-white/10 flex items-center gap-12 hud-controls">
                             <button onclick="togglePlay()" class="text-5xl text-white hover:text-cyan-400 transition-all transform hover:scale-110">
                                 <i id="play-icon" class="fas fa-play"></i>
                             </button>
                             <div class="flex flex-col gap-3">
-                                <div class="relative w-96 h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div class="relative w-96 h-2 bg-white/5 rounded-full overflow-hidden hud-progress">
                                     <div id="progress" class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-400 to-indigo-600 w-0"></div>
                                 </div>
-                                <div class="flex justify-between font-mono text-[10px] font-black text-gray-500 uppercase">
+                                <div class="flex justify-between font-mono text-[10px] font-black text-gray-500 uppercase tracking-tighter">
                                     <span id="time-current">00:00:00</span>
                                     <span id="time-total">00:00:00</span>
                                 </div>
@@ -307,7 +360,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-8 text-center uppercase">
+                <div id="desktop-stats" class="grid grid-cols-3 gap-8 text-center uppercase">
                     <div class="glass-panel p-6 rounded-3xl">
                         <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Audio Quality</span>
                         <span class="text-xs font-mono font-bold text-yellow-500">HD PROCESSING</span>
@@ -324,7 +377,7 @@
             </div>
         </section>
 
-        <!-- Marketplace & Pricing Sections -->
+        <!-- Lab & Pricing (Simplified) -->
         <section id="marketplace-section" class="hidden max-w-7xl mx-auto py-24 text-center">
             <h2 class="text-6xl font-black uppercase mb-12">The <span class="gradient-text">Styles Lab</span></h2>
             <div id="packages-grid" class="grid grid-cols-2 md:grid-cols-5 gap-8"></div>
@@ -333,38 +386,45 @@
         <section id="pricing-section" class="hidden max-w-[1400px] mx-auto py-24 text-center">
             <h2 class="text-7xl font-black uppercase mb-16">The <span class="gradient-text">Licensing</span></h2>
             <div class="grid md:grid-cols-3 gap-16">
-                <div class="glass-panel p-12 rounded-[3.5rem] opacity-50">
-                    <h3 class="text-xl font-black mb-12 uppercase">Trainee</h3>
-                    <div class="text-6xl font-black">€0</div>
+                <div class="glass-panel p-12 rounded-[3.5rem] opacity-50"><h3 class="text-xl font-black mb-12 uppercase">Trainee</h3><div class="text-6xl font-black">€0</div></div>
+                <div class="gradient-border p-14 scale-110 shadow-2xl border border-cyan-500/20">
+                    <h3 class="text-2xl font-black text-cyan-400 mb-12 uppercase">Ultra Artist</h3><div class="text-7xl font-black">€19</div>
+                    <button onclick="openModal('payment-modal')" class="w-full py-6 btn-primary rounded-3xl mt-12 uppercase font-black">Get Access</button>
                 </div>
-                <div class="gradient-border p-14 scale-110 shadow-2xl">
-                    <h3 class="text-2xl font-black text-cyan-400 mb-12 uppercase">Ultra Artist</h3>
-                    <div class="text-7xl font-black">€19</div>
-                    <button onclick="openModal('payment-modal')" class="w-full py-6 btn-primary rounded-3xl mt-12 uppercase font-black">Get Ultra Access</button>
-                </div>
-                <div class="glass-panel p-12 rounded-[3.5rem]">
-                    <h3 class="text-xl font-black mb-12 uppercase">Agency</h3>
-                    <div class="text-6xl font-black">€49</div>
-                </div>
+                <div class="glass-panel p-12 rounded-[3.5rem]"><h3 class="text-xl font-black mb-12 uppercase">Agency</h3><div class="text-6xl font-black">€49</div></div>
             </div>
         </section>
     </main>
 
+    <!-- Mobile Settings Overlay -->
+    <div id="mobile-menu" class="modal-overlay">
+        <div class="glass-panel p-10 rounded-[3rem] w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto space-y-8 border border-white/10">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-black uppercase">App Settings</h2>
+                <button onclick="closeMobileMenu()" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="mobile-settings-target" class="space-y-6">
+                <!-- Tu sa vložia nastavenia z bočného panela pomocou JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Platobná Brána -->
     <div id="payment-modal" class="modal-overlay">
-        <div class="glass-panel p-16 rounded-[4.5rem] max-w-2xl w-full mx-4 relative border border-white/10">
+        <div class="glass-panel p-16 rounded-[4.5rem] max-w-2xl w-full mx-4 relative border border-white/10 shadow-2xl">
             <button onclick="closeModal('payment-modal')" class="absolute top-12 right-12 text-gray-500 hover:text-white transition-all"><i class="fas fa-times text-3xl"></i></button>
             <div class="text-center mb-16">
                 <h2 class="text-5xl font-black uppercase tracking-tighter mb-4">Secure <span class="gradient-text">Studio Link</span></h2>
                 <p class="text-[11px] text-gray-500 uppercase font-bold tracking-widest">Authorized Transaction via IDB</p>
             </div>
             <div class="space-y-8 text-center">
-                <input type="text" placeholder="Identity Card Number" class="bg-white/5 w-full p-8 rounded-[2rem] text-2xl outline-none font-mono tracking-widest border border-white/5 focus:border-cyan-400 transition-colors">
-                <button onclick="handleIDBPremiumPurchase()" class="w-full py-8 btn-primary rounded-[2.5rem] font-black text-2xl uppercase tracking-widest">Unlock Studio Features</button>
+                <input type="text" placeholder="Identity Card Number" class="bg-white/5 w-full p-8 rounded-[2rem] text-2xl outline-none font-mono tracking-widest border border-white/5 focus:border-cyan-400">
+                <button onclick="handleIDBPremiumPurchase()" class="w-full py-8 btn-primary rounded-[2.5rem] font-black text-2xl uppercase tracking-widest">Establish Connection</button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-12 right-12 glass-panel px-12 py-8 rounded-[3rem] hidden transform translate-y-40 transition-all duration-700 flex items-center gap-8 z-[2000] border border-white/10">
+    <div id="toast" class="fixed bottom-12 right-12 glass-panel px-12 py-8 rounded-[3rem] hidden transform translate-y-40 transition-all duration-700 flex items-center gap-8 z-[2000] border border-white/10 shadow-2xl">
         <div id="toast-icon" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"></div>
         <div id="toast-msg" class="font-black text-sm uppercase"></div>
     </div>
@@ -376,7 +436,7 @@
 
         async function initIndexedDB() {
             return new Promise((resolve) => {
-                const req = indexedDB.open(DB_NAME, 5);
+                const req = indexedDB.open(DB_NAME, 6);
                 req.onupgradeneeded = (e) => {
                     const db = event.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
@@ -402,18 +462,12 @@
             });
         }
 
-        // State Variables
-        let isPremium = false, 
-            audioContext, analyser, dataArray, source, audioStreamDest, 
-            isPlaying = false, animationId, mediaRecorder, recordedChunks = [], 
-            isRecording = false, bgType = 'none';
+        // --- STATE ---
+        let isPremium = false, audioContext, analyser, dataArray, source, audioStreamDest, 
+            isPlaying = false, animationId, mediaRecorder, recordedChunks = [], isRecording = false, 
+            bgType = 'none', isAppMode = false;
 
-        // Customization State
-        let vizColor = '#00ff42';
-        let vizScale = 1.0;
-        let bassGain = 0; // dB
-
-        // Audio Nodes for Enhancement
+        let vizColor = '#00ff42', vizScale = 1.0, bassGain = 0;
         let bassFilter, compressor;
 
         const canvas = document.getElementById('visualizer-canvas');
@@ -430,51 +484,81 @@
             await initIndexedDB();
             await syncPremiumStatus();
             await loadStudioSettings();
+            
+            const savedAppMode = await getFromDB('appMode');
+            if(savedAppMode) setAppMode(true);
+
             initLabItems();
             resizeCanvas();
             drawLoop();
             setInterval(syncPremiumStatus, 30000);
         };
 
+        // --- STUDIO LOGIC ---
         async function loadStudioSettings() {
             const settings = await getFromDB('visualSettings');
             if (settings) {
-                vizColor = settings.color || '#00ff42';
-                vizScale = settings.scale || 1.0;
-                bassGain = settings.bassGain || 0;
-                
-                colorPicker.value = vizColor;
-                document.getElementById('color-hex').innerText = vizColor;
-                scaleSlider.value = vizScale;
-                document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
-                bassSlider.value = bassGain;
-                document.getElementById('bass-val').innerText = `+${bassGain} dB`;
+                vizColor = settings.color || '#00ff42'; vizScale = settings.scale || 1.0; bassGain = settings.bassGain || 0;
+                colorPicker.value = vizColor; document.getElementById('color-hex').innerText = vizColor;
+                scaleSlider.value = vizScale; document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
+                bassSlider.value = bassGain; document.getElementById('bass-val').innerText = `+${bassGain} dB`;
             }
         }
 
-        async function saveStudioSettings() {
-            await saveToDB('visualSettings', { color: vizColor, scale: vizScale, bassGain: bassGain });
+        async function saveStudioSettings() { await saveToDB('visualSettings', { color: vizColor, scale: vizScale, bassGain: bassGain }); }
+
+        colorPicker.oninput = (e) => { vizColor = e.target.value; document.getElementById('color-hex').innerText = vizColor; saveStudioSettings(); };
+        scaleSlider.oninput = (e) => { vizScale = parseFloat(e.target.value); document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x'; saveStudioSettings(); };
+        bassSlider.oninput = (e) => { bassGain = parseFloat(e.target.value); document.getElementById('bass-val').innerText = `+${bassGain} dB`; if (bassFilter) bassFilter.gain.value = bassGain; saveStudioSettings(); };
+
+        // --- APP MODE LOGIC ---
+        window.toggleAppMode = async () => {
+            isAppMode = !isAppMode;
+            setAppMode(isAppMode);
+            await saveToDB('appMode', isAppMode);
+            showToast(isAppMode ? "MOBILE APP MODE ON" : "DESKTOP STUDIO MODE ON", "success");
+        };
+
+        function setAppMode(active) {
+            const body = document.getElementById('main-body');
+            const btn = document.getElementById('app-mode-btn');
+            isAppMode = active;
+            if (active) {
+                body.classList.add('app-mode-active');
+                btn.classList.add('text-cyan-400', 'bg-cyan-500/10');
+            } else {
+                body.classList.remove('app-mode-active');
+                btn.classList.remove('text-cyan-400', 'bg-cyan-500/10');
+            }
+            setTimeout(resizeCanvas, 600); // Wait for transition
         }
 
-        colorPicker.oninput = (e) => {
-            vizColor = e.target.value;
-            document.getElementById('color-hex').innerText = vizColor;
-            saveStudioSettings();
+        window.openMobileMenu = () => {
+            const target = document.getElementById('mobile-settings-target');
+            const source = document.querySelector('.xl\\:col-span-3'); // Získa nastavenia z desktop panela
+            target.innerHTML = source.innerHTML;
+            
+            // Re-bind listeners for cloned elements
+            const clonedColor = target.querySelector('#viz-color-picker');
+            const clonedScale = target.querySelector('#viz-scale-slider');
+            const clonedBass = target.querySelector('#bass-boost-slider');
+            const clonedFile = target.querySelector('#file-input');
+            const clonedStyle = target.querySelector('#viz-style');
+            const clonedRec = target.querySelector('#record-btn');
+
+            if(clonedColor) clonedColor.oninput = colorPicker.oninput;
+            if(clonedScale) clonedScale.oninput = scaleSlider.oninput;
+            if(clonedBass) clonedBass.oninput = bassSlider.oninput;
+            if(clonedFile) clonedFile.onchange = fileInput.onchange;
+            if(clonedStyle) clonedStyle.onchange = (e) => { document.getElementById('viz-style').value = e.target.value; };
+            if(clonedRec) clonedRec.onclick = toggleRecording;
+
+            document.getElementById('mobile-menu').style.display = 'flex';
         };
 
-        scaleSlider.oninput = (e) => {
-            vizScale = parseFloat(e.target.value);
-            document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
-            saveStudioSettings();
-        };
+        window.closeMobileMenu = () => document.getElementById('mobile-menu').style.display = 'none';
 
-        bassSlider.oninput = (e) => {
-            bassGain = parseFloat(e.target.value);
-            document.getElementById('bass-val').innerText = `+${bassGain} dB`;
-            if (bassFilter) bassFilter.gain.value = bassGain;
-            saveStudioSettings();
-        };
-
+        // --- ENGINE & RENDER ---
         async function syncPremiumStatus() {
             const profile = await getFromDB('userProfile');
             const now = Date.now();
@@ -485,14 +569,9 @@
             if (profile && profile.isPremium && profile.expiryDate > now) {
                 isPremium = true; ind.classList.remove('hidden'); upg.classList.add('hidden');
                 exp.innerText = `Access Until: ${new Date(profile.expiryDate).toLocaleDateString()}`;
-                exp.classList.add('text-cyan-400');
             } else {
-                if (profile && profile.isPremium) {
-                    profile.isPremium = false; await saveToDB('userProfile', profile);
-                    showToast("SESSION EXPIRED", "error");
-                }
                 isPremium = false; ind.classList.add('hidden'); upg.classList.remove('hidden');
-                exp.innerText = "Standard Tier"; exp.classList.remove('text-cyan-400');
+                exp.innerText = "Standard Tier";
             }
         }
 
@@ -529,10 +608,10 @@
 
         function initLabItems() {
             const grid = document.getElementById('packages-grid'); if (!grid) return;
-            for(let i=1; i<=30; i++) {
+            for(let i=1; i<=15; i++) {
                 const div = document.createElement('div');
                 div.className = 'glass-panel p-10 rounded-[3rem] flex flex-col items-center cursor-pointer hover:-translate-y-2 transition-all';
-                div.innerHTML = `<div class="w-full aspect-square rounded-3xl mb-8 bg-white/5 flex items-center justify-center border border-white/5"><i class="fas fa-wave-square text-3xl text-cyan-500/20"></i></div><h4 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-widest">Preset #${i}</h4><span class="text-white text-2xl font-black">€${(Math.random() * 20 + 10).toFixed(2)}</span>`;
+                div.innerHTML = `<div class="w-full aspect-square rounded-3xl mb-8 bg-white/5 flex items-center justify-center border border-white/5"><i class="fas fa-atom text-3xl text-cyan-500/20"></i></div><h4 class="text-[10px] font-black uppercase mb-4 text-gray-500">Preset #${i}</h4><span class="text-white text-2xl font-black">€${(Math.random() * 20 + 10).toFixed(2)}</span>`;
                 grid.appendChild(div);
             }
         }
@@ -541,50 +620,27 @@
             const file = e.target.files[0]; if (!file) return;
             const url = URL.createObjectURL(file);
             if (file.type.startsWith('audio/')) { audio.src = url; showToast("HD AUDIO LOADED", "success"); }
-            else if (file.type.startsWith('video/')) { hiddenVideo.src = url; bgType = 'video'; hiddenVideo.play(); showToast("VIDEO WRAPPER SET", "success"); }
-            else if (file.type.startsWith('image/')) { hiddenImg.src = url; bgType = 'image'; showToast("OPTICAL LAYER READY", "success"); }
+            else if (file.type.startsWith('video/')) { hiddenVideo.src = url; bgType = 'video'; hiddenVideo.play(); showToast("VIDEO LAYER READY", "success"); }
+            else if (file.type.startsWith('image/')) { hiddenImg.src = url; bgType = 'image'; showToast("IMAGE LAYER SET", "success"); }
             if (!audioContext) initStudioEngine();
         };
 
         function initStudioEngine() {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // 1. Source
             source = audioContext.createMediaElementSource(audio);
-            
-            // 2. Bass Boost Filter (Low Shelf at 200Hz)
             bassFilter = audioContext.createBiquadFilter();
-            bassFilter.type = 'lowshelf';
-            bassFilter.frequency.value = 200;
-            bassFilter.gain.value = bassGain;
-
-            // 3. Studio Compressor (Prevents distortion)
+            bassFilter.type = 'lowshelf'; bassFilter.frequency.value = 200; bassFilter.gain.value = bassGain;
             compressor = audioContext.createDynamicsCompressor();
             compressor.threshold.setValueAtTime(-24, audioContext.currentTime);
-            compressor.knee.setValueAtTime(40, audioContext.currentTime);
-            compressor.ratio.setValueAtTime(12, audioContext.currentTime);
-            compressor.attack.setValueAtTime(0, audioContext.currentTime);
-            compressor.release.setValueAtTime(0.25, audioContext.currentTime);
-
-            // 4. Analyser
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 512;
+            analyser = audioContext.createAnalyser(); analyser.fftSize = 512;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-            // 5. Recorder Destination
             audioStreamDest = audioContext.createMediaStreamDestination();
-
-            // CONNECT NODES: Source -> Bass -> Compressor -> Analyser -> Output
-            // Also connect to recorder
-            source.connect(bassFilter);
-            bassFilter.connect(compressor);
-            compressor.connect(analyser);
-            analyser.connect(audioContext.destination);
-            analyser.connect(audioStreamDest);
+            source.connect(bassFilter); bassFilter.connect(compressor); compressor.connect(analyser);
+            analyser.connect(audioContext.destination); analyser.connect(audioStreamDest);
         }
 
         window.togglePlay = () => {
-            if (!audio.src) return showToast("CHÝBA MÉDIUM", "error");
+            if (!audio.src) return showToast("CHÝBA ZDROJ", "error");
             if (audioContext?.state === 'suspended') audioContext.resume();
             if (isPlaying) audio.pause(); else audio.play();
             isPlaying = !isPlaying;
@@ -599,16 +655,11 @@
         audio.onended = () => { if (isRecording) stopRecording(); isPlaying = false; document.getElementById('play-icon').className = 'fas fa-play'; };
 
         function formatTime(s) {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = Math.floor(s % 60);
+            const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const sec = Math.floor(s % 60);
             return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
-        window.toggleRecording = () => {
-            if (!audio.src) return showToast("RENDER CHYBA: ŽIADNY ZVUK", "error");
-            if (!isRecording) startRecording(); else stopRecording();
-        };
+        window.toggleRecording = () => { if (!audio.src) return showToast("ŽIADNE AUDIO", "error"); if (!isRecording) startRecording(); else stopRecording(); };
 
         function startRecording() {
             isRecording = true; recordedChunks = [];
@@ -618,7 +669,7 @@
             mediaRecorder.onstop = () => {
                 const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }));
                 a.download = `SonicUltra_Studio_Render_${Date.now()}.webm`; a.click();
-                showToast("STUDIO RENDER COMPLETE", "success");
+                showToast("RENDER COMPLETE", "success");
             };
             mediaRecorder.start();
             document.getElementById('recording-status').classList.remove('hidden');
@@ -637,19 +688,12 @@
             if(analyser) analyser.getByteFrequencyData(dataArray);
 
             const dpr = window.devicePixelRatio || 2;
-            const w = canvas.width / dpr;
-            const h = canvas.height / dpr;
-            const centerX = w / 2;
-            const centerY = h / 2;
+            const w = canvas.width / dpr, h = canvas.height / dpr, centerX = w / 2, centerY = h / 2;
 
-            ctx.shadowBlur = 0;
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.clearRect(0, 0, w, h);
-            ctx.fillStyle = "#020202";
-            ctx.fillRect(0, 0, w, h);
+            ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = "#020202"; ctx.fillRect(0, 0, w, h);
 
-            ctx.save();
-            ctx.globalAlpha = 0.90; 
+            ctx.save(); ctx.globalAlpha = 0.90; 
             if (bgType === 'video' && hiddenVideo.readyState >= 2) ctx.drawImage(hiddenVideo, 0, 0, w, h);
             else if (bgType === 'image' && hiddenImg.complete) ctx.drawImage(hiddenImg, 0, 0, w, h);
             ctx.restore();
@@ -659,43 +703,28 @@
             const style = document.getElementById('viz-style').value;
             if (style.startsWith('pro-') && !isPremium) {
                 ctx.fillStyle = "rgba(0,0,0,0.96)"; ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = "#00f2fe"; ctx.font = "900 36px 'Plus Jakarta Sans'"; ctx.textAlign = "center";
+                ctx.fillStyle = "#00f2fe"; ctx.font = "900 32px 'Plus Jakarta Sans'"; ctx.textAlign = "center";
                 ctx.fillText("UNLOCK STUDIO ACCESS", centerX, centerY);
                 return;
             }
 
-            ctx.save();
-            ctx.globalCompositeOperation = 'lighter';
-
+            ctx.save(); ctx.globalCompositeOperation = 'lighter';
             if (style === 'pro-ultra-circle') {
                 const bassValue = (dataArray[1] + dataArray[2] + dataArray[3]) / 3;
                 const bassResponse = (bassValue / 255) * 60;
                 const baseRadius = (180 * vizScale) + bassResponse;
-                
-                ctx.shadowBlur = 40;
-                ctx.shadowColor = vizColor;
-                ctx.strokeStyle = vizColor;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2);
-                ctx.stroke();
-
+                ctx.shadowBlur = 40; ctx.shadowColor = vizColor; ctx.strokeStyle = vizColor; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2); ctx.stroke();
                 for (let i = 0; i < dataArray.length; i += 2) {
                     const angle = (i / dataArray.length) * Math.PI * 2 + (Date.now() / 2500);
                     const magnitude = dataArray[i];
                     for (let j = 0; j < 6; j++) {
                         const jitterAngle = angle + (Math.random() - 0.5) * 0.15;
                         const fuzzyLen = (magnitude / 255) * 140 * vizScale * Math.random();
-                        const startX = centerX + Math.cos(jitterAngle) * baseRadius;
-                        const startY = centerY + Math.sin(jitterAngle) * baseRadius;
-                        const endX = centerX + Math.cos(jitterAngle) * (baseRadius + fuzzyLen);
-                        const endY = centerY + Math.sin(jitterAngle) * (baseRadius + fuzzyLen);
-                        ctx.beginPath();
-                        ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
-                        ctx.strokeStyle = vizColor;
-                        ctx.globalAlpha = (Math.random() * 0.4) + 0.1;
-                        ctx.lineWidth = 1 + Math.random() * 1.5;
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(centerX + Math.cos(jitterAngle) * baseRadius, centerY + Math.sin(jitterAngle) * baseRadius);
+                        ctx.lineTo(centerX + Math.cos(jitterAngle) * (baseRadius + fuzzyLen), centerY + Math.sin(jitterAngle) * (baseRadius + fuzzyLen));
+                        ctx.strokeStyle = vizColor; ctx.globalAlpha = (Math.random() * 0.4) + 0.1;
+                        ctx.lineWidth = 1 + Math.random() * 1.5; ctx.stroke();
                     }
                 }
             } else if (style === 'pro-triangle') {
