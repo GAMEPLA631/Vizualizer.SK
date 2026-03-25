@@ -25,12 +25,12 @@
             color: white;
             overflow-x: hidden;
             letter-spacing: -0.01em;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.5s ease;
         }
 
         .glass-panel {
             background: var(--glass);
-            backdrop-filter: blur(25px) saturate(200%);
+            backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--border);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
         }
@@ -44,10 +44,8 @@
 
         .gradient-border::before {
             content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: 1.5rem;
-            padding: 1px;
+            position: absolute; inset: -1px;
+            border-radius: 1.5rem; padding: 1px;
             background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -69,9 +67,10 @@
 
         #visualizer-canvas {
             image-rendering: auto;
+            will-change: transform;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
@@ -79,21 +78,18 @@
 
         .modal-overlay {
             display: none;
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             backdrop-filter: blur(15px);
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
         }
 
         #hidden-bg-video, #hidden-bg-img { display: none; }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: black;
-            font-weight: 700;
+            color: black; font-weight: 700;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -116,92 +112,46 @@
 
         .premium-tag {
             background: linear-gradient(45deg, #fceabb, #f8b500);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent; -webkit-text-fill-color: transparent;
             font-size: 0.75rem; font-weight: 900;
             letter-spacing: 0.15em;
         }
 
         input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 4px;
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 4px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
+            border-radius: 2px; outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--primary);
-            border: none;
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px;
+            background: var(--primary); border-radius: 50%;
+            cursor: pointer; box-shadow: 0 0 10px var(--primary);
         }
 
         input[type="color"] {
-            -webkit-appearance: none;
-            appearance: none;
-            border: none;
-            width: 40px;
-            height: 40px;
-            background: transparent;
-            cursor: pointer;
-        }
-        
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch {
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            -webkit-appearance: none; appearance: none;
+            border: none; width: 40px; height: 40px;
+            background: transparent; cursor: pointer;
         }
 
-        /* FORMAT RATIO CLASSES */
         .ratio-standard { aspect-ratio: 16 / 9; max-width: 100%; }
         .ratio-shorts { 
             aspect-ratio: 9 / 16; 
-            max-width: 380px !important; 
+            max-width: 360px !important; 
             margin: 0 auto; 
-            border: 8px solid #1a1a1a !important; 
+            border: 8px solid #111 !important; 
             border-radius: 3.5rem !important; 
         }
 
-        .format-btn-active {
-            background: rgba(0, 242, 254, 0.15) !important;
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
-        }
-
-        /* APP MODE LOGIC */
-        .app-mode-active #studio-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-top: 2rem;
-        }
-
+        .app-mode-active #studio-section { display: flex; justify-content: center; align-items: center; }
         .app-mode-active .sidebar-content { display: none; }
-        .app-mode-active #capture-area {
-            max-width: 360px;
-            aspect-ratio: 9/16;
-            border: 10px solid #1a1a1a;
-            box-shadow: 0 50px 120px -20px rgba(0,0,0,1);
-        }
-
+        .app-mode-active #capture-area { max-width: 340px; aspect-ratio: 9/16; border: 10px solid #111; }
         #mobile-settings-trigger { display: none; }
-        .app-mode-active #mobile-settings-trigger {
-            display: flex;
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 100;
-        }
+        .app-mode-active #mobile-settings-trigger { display: flex; position: fixed; bottom: 2rem; right: 2rem; z-index: 100; }
     </style>
 </head>
 <body class="custom-scrollbar" id="main-body">
@@ -216,19 +166,19 @@
             </div>
             <div class="hidden sm:block">
                 <span class="text-2xl font-black tracking-tighter uppercase leading-none block">SonicViz <span class="text-cyan-400">Ultra</span></span>
-                <span class="text-[9px] uppercase tracking-[0.3em] text-gray-500 font-bold">The Peak Performance</span>
+                <span class="text-[9px] uppercase tracking-[0.3em] text-gray-500 font-bold tracking-widest">Optimized Performance</span>
             </div>
         </div>
         
         <div class="hidden lg:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
             <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('studio')">Studio</a>
-            <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('marketplace')">Styles Lab</a>
+            <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('marketplace')">Lab</a>
             <a href="#" class="hover:text-cyan-400 transition" onclick="showSection('pricing')">Licensing</a>
         </div>
 
         <div class="flex items-center gap-4">
-            <button onclick="toggleAppMode()" id="app-mode-btn" class="p-3 bg-white/5 border border-white/10 rounded-xl hover:text-cyan-400 transition-all group" title="Prepnúť do App režimu">
-                <i class="fas fa-mobile-screen-button text-lg group-hover:scale-110 transition"></i>
+            <button onclick="toggleAppMode()" id="app-mode-btn" class="p-3 bg-white/5 border border-white/10 rounded-xl hover:text-cyan-400 transition-all group">
+                <i class="fas fa-mobile-screen-button text-lg"></i>
             </button>
             <div id="premium-status-indicator" class="hidden">
                 <span class="premium-tag px-4 py-2 border border-yellow-500/20 glass-panel rounded-full">ULTRA ACCESS</span>
@@ -239,50 +189,45 @@
         </div>
     </nav>
 
-    <button id="mobile-settings-trigger" onclick="openMobileMenu()" class="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition active:scale-95">
+    <button id="mobile-settings-trigger" onclick="openMobileMenu()" class="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-2xl transition active:scale-95">
         <i class="fas fa-sliders text-xl"></i>
     </button>
 
     <main class="pt-28 min-h-screen px-8 pb-12 transition-all duration-700">
         <section id="studio-section" class="max-w-[1700px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-10">
-            <!-- Bočné ovládanie -->
+            <!-- Sidebar -->
             <div class="xl:col-span-3 space-y-8 sidebar-content">
-                
-                <!-- NEW: Project Format Selection -->
                 <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 space-y-6">
                     <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Project Format</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <button id="btn-ratio-video" onclick="setFormat('video')" class="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-400 transition-all format-btn-active">
-                            <i class="fas fa-desktop text-lg"></i>
-                            <span class="text-[9px] font-black uppercase">Video (16:9)</span>
+                            <i class="fas fa-desktop"></i>
+                            <span class="text-[9px] font-black uppercase">16:9</span>
                         </button>
                         <button id="btn-ratio-shorts" onclick="setFormat('shorts')" class="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-400 transition-all">
-                            <i class="fas fa-mobile-alt text-lg"></i>
-                            <span class="text-[9px] font-black uppercase">Shorts (9:16)</span>
+                            <i class="fas fa-mobile-alt"></i>
+                            <span class="text-[9px] font-black uppercase">Shorts</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 space-y-8">
-                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Visual & Audio Engine</h3>
+                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 space-y-6">
+                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Visual & Audio</h3>
                     <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase block mb-3">Accent Color</label>
-                            <div class="flex items-center gap-4">
-                                <input type="color" id="viz-color-picker" value="#00ff42">
-                                <span id="color-hex" class="text-[10px] font-mono text-gray-500 uppercase">#00ff42</span>
-                            </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Accent Color</label>
+                            <input type="color" id="viz-color-picker" value="#00ff42">
                         </div>
                         <div>
-                            <div class="flex justify-between mb-3">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Sphere Scale</label>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase">Scale</label>
                                 <span id="scale-val" class="text-[10px] font-mono text-cyan-400">1.00x</span>
                             </div>
                             <input type="range" id="viz-scale-slider" min="0.5" max="2.5" step="0.05" value="1.0">
                         </div>
-                        <div class="pt-4 border-t border-white/5">
-                            <div class="flex justify-between mb-3">
-                                <label class="text-[10px] font-bold text-yellow-500 uppercase">Ultra Bass Boost</label>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-[10px] font-bold text-yellow-500 uppercase">Bass Boost</label>
                                 <span id="bass-val" class="text-[10px] font-mono text-yellow-500">+0 dB</span>
                             </div>
                             <input type="range" id="bass-boost-slider" min="0" max="20" step="1" value="0">
@@ -290,59 +235,53 @@
                     </div>
                 </div>
 
-                <div class="gradient-border p-8 space-y-6">
-                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Materiály</h3>
-                    <label class="group relative block w-full cursor-pointer bg-white/[0.03] border border-white/10 hover:border-cyan-400/50 p-10 rounded-3xl text-center transition-all duration-700">
-                        <i class="fas fa-cloud-arrow-up text-3xl mb-4 text-cyan-400"></i>
-                        <span class="block text-[11px] font-bold text-gray-300 uppercase tracking-widest">Nahrať Médiá</span>
+                <div class="gradient-border p-8 space-y-4">
+                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em]">Files</h3>
+                    <label class="block w-full cursor-pointer bg-white/[0.03] border border-white/10 hover:border-cyan-400/50 p-6 rounded-3xl text-center transition-all">
+                        <i class="fas fa-cloud-arrow-up text-2xl mb-2 text-cyan-400"></i>
+                        <span class="block text-[10px] font-bold text-gray-300 uppercase">Inject Media</span>
                         <input type="file" id="file-input" class="hidden" accept="audio/*,video/*,image/*">
                     </label>
                 </div>
 
                 <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5">
-                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.25em] mb-6">Visual Style</h3>
-                    <select id="viz-style" class="w-full bg-black/60 border border-white/10 p-4 rounded-2xl text-xs focus:outline-none focus:border-cyan-500 transition-all font-bold uppercase tracking-widest">
-                        <option value="circle">Neon Horizon (Circle)</option>
-                        <option value="bars">Matrix Pulse (Bars)</option>
+                    <select id="viz-style" class="w-full bg-black/60 border border-white/10 p-4 rounded-2xl text-xs focus:outline-none focus:border-cyan-500 font-bold uppercase tracking-widest">
+                        <option value="circle">Neon Circle</option>
+                        <option value="bars">Bars</option>
                         <optgroup label="PRO ULTRA MODES">
-                            <option value="pro-ultra-circle" selected>PRO Green Nebula (Sphere)</option>
+                            <option value="pro-ultra-circle" selected>PRO Green Nebula</option>
                             <option value="pro-triangle">PRO Sacred Geometry</option>
-                            <option value="cyber">Cyberpunk Relay</option>
-                            <option value="vapor">Synthwave Sun</option>
                         </optgroup>
                     </select>
                 </div>
 
-                <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5">
-                    <button id="record-btn" onclick="toggleRecording()" class="w-full flex items-center justify-center gap-4 py-5 bg-white/5 hover:bg-red-500/15 border border-white/10 rounded-2xl transition-all duration-500">
-                        <i class="fas fa-circle text-gray-600"></i>
-                        <span class="text-[12px] font-black uppercase tracking-[0.25em]">Execute Render</span>
-                    </button>
-                </div>
+                <button id="record-btn" onclick="toggleRecording()" class="w-full py-5 bg-white/5 hover:bg-red-500/15 border border-white/10 rounded-2xl transition-all font-black text-[12px] uppercase tracking-[0.25em]">
+                    Export Render
+                </button>
             </div>
 
-            <!-- Visualizer Core -->
-            <div class="xl:col-span-9 space-y-8 main-content-area">
+            <!-- Canvas Area -->
+            <div class="xl:col-span-9 space-y-8">
                 <div id="capture-area" class="relative w-full ratio-standard overflow-hidden bg-black shadow-2xl border border-white/10 transition-all duration-700">
                     <video id="hidden-bg-video" loop muted crossorigin="anonymous"></video>
                     <img id="hidden-bg-img" crossorigin="anonymous">
                     <canvas id="visualizer-canvas" class="w-full h-full relative z-10"></canvas>
 
-                    <div id="recording-status" class="hidden absolute top-12 left-12 z-20 flex items-center gap-4 bg-black/70 backdrop-blur-xl px-6 py-3 rounded-full border border-red-500/40 shadow-2xl">
+                    <div id="recording-status" class="hidden absolute top-8 left-8 z-20 flex items-center gap-3 bg-black/70 backdrop-blur-xl px-5 py-2 rounded-full border border-red-500/40">
                         <div class="rec-dot"></div>
-                        <span class="text-[11px] font-black uppercase tracking-[0.25em] text-red-500">Rendering...</span>
+                        <span class="text-[10px] font-black uppercase text-red-500">Rec</span>
                     </div>
 
-                    <div class="absolute inset-x-0 bottom-12 z-20 flex justify-center items-center">
-                        <div class="glass-panel px-10 py-6 rounded-[3rem] border border-white/10 flex items-center gap-8 hud-controls">
-                            <button onclick="togglePlay()" class="text-4xl text-white hover:text-cyan-400 transition-all transform hover:scale-110">
+                    <div class="absolute inset-x-0 bottom-10 z-20 flex justify-center items-center">
+                        <div class="glass-panel px-8 py-5 rounded-full border border-white/10 flex items-center gap-6 hud-controls">
+                            <button onclick="togglePlay()" class="text-4xl text-white hover:text-cyan-400 transition-all transform hover:scale-110 active:scale-95">
                                 <i id="play-icon" class="fas fa-play"></i>
                             </button>
-                            <div class="flex flex-col gap-2">
-                                <div class="relative w-72 h-1.5 bg-white/5 rounded-full overflow-hidden hud-progress">
+                            <div class="flex flex-col gap-1.5">
+                                <div class="relative w-64 h-1.5 bg-white/5 rounded-full overflow-hidden hud-progress">
                                     <div id="progress" class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-400 to-indigo-600 w-0"></div>
                                 </div>
-                                <div class="flex justify-between font-mono text-[9px] font-black text-gray-500 uppercase tracking-tighter">
+                                <div class="flex justify-between font-mono text-[9px] font-black text-gray-500 uppercase tracking-widest">
                                     <span id="time-current">00:00:00</span>
                                     <span id="time-total">00:00:00</span>
                                 </div>
@@ -350,72 +289,28 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="desktop-stats" class="grid grid-cols-3 gap-8 text-center uppercase">
-                    <div class="glass-panel p-6 rounded-3xl">
-                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Audio Quality</span>
-                        <span class="text-xs font-mono font-bold text-yellow-500">HD PROCESSING</span>
-                    </div>
-                    <div class="glass-panel p-6 rounded-3xl">
-                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Format</span>
-                        <span id="stat-format" class="text-xs font-mono font-bold text-cyan-400">Standard 16:9</span>
-                    </div>
-                    <div class="glass-panel p-6 rounded-3xl">
-                        <span class="text-[10px] font-black text-gray-500 tracking-widest block mb-1">Engine</span>
-                        <span class="text-xs font-mono font-bold text-green-400">LATENCY FREE</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Pricing (Simplified) -->
-        <section id="marketplace-section" class="hidden max-w-7xl mx-auto py-24 text-center">
-            <h2 class="text-6xl font-black uppercase mb-12">The <span class="gradient-text">Styles Lab</span></h2>
-            <div id="packages-grid" class="grid grid-cols-2 md:grid-cols-5 gap-8"></div>
-        </section>
-
-        <section id="pricing-section" class="hidden max-w-[1400px] mx-auto py-24 text-center">
-            <h2 class="text-7xl font-black uppercase mb-16">The <span class="gradient-text">Licensing</span></h2>
-            <div class="grid md:grid-cols-3 gap-16">
-                <div class="glass-panel p-12 rounded-[3.5rem] opacity-50"><h3 class="text-xl font-black mb-12 uppercase">Trainee</h3><div class="text-6xl font-black">€0</div></div>
-                <div class="gradient-border p-14 scale-110 shadow-2xl border border-cyan-500/20">
-                    <h3 class="text-2xl font-black text-cyan-400 mb-12 uppercase">Ultra Artist</h3><div class="text-7xl font-black">€19</div>
-                    <button onclick="openModal('payment-modal')" class="w-full py-6 btn-primary rounded-3xl mt-12 uppercase font-black">Get Access</button>
-                </div>
-                <div class="glass-panel p-12 rounded-[3.5rem]"><h3 class="text-xl font-black mb-12 uppercase">Agency</h3><div class="text-6xl font-black">€49</div></div>
             </div>
         </section>
     </main>
 
-    <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="modal-overlay">
         <div class="glass-panel p-10 rounded-[3rem] w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto space-y-8 border border-white/10">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black uppercase">App Settings</h2>
-                <button onclick="closeMobileMenu()" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
-            </div>
             <div id="mobile-settings-target" class="space-y-6"></div>
+            <button onclick="closeMobileMenu()" class="w-full py-4 bg-white/5 rounded-2xl uppercase font-black text-xs">Zatvoriť</button>
         </div>
     </div>
 
-    <!-- Platobná Brána -->
     <div id="payment-modal" class="modal-overlay">
-        <div class="glass-panel p-16 rounded-[4.5rem] max-w-2xl w-full mx-4 relative border border-white/10 shadow-2xl">
-            <button onclick="closeModal('payment-modal')" class="absolute top-12 right-12 text-gray-500 hover:text-white transition-all"><i class="fas fa-times text-3xl"></i></button>
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-black uppercase tracking-tighter mb-4">Secure <span class="gradient-text">Studio Link</span></h2>
-                <p class="text-[11px] text-gray-500 uppercase font-bold tracking-widest">Authorized Transaction via IDB</p>
-            </div>
-            <div class="space-y-8 text-center">
-                <input type="text" placeholder="Identity Card Number" class="bg-white/5 w-full p-8 rounded-[2rem] text-2xl outline-none font-mono tracking-widest border border-white/5 focus:border-cyan-400 transition-colors">
-                <button onclick="handleIDBPremiumPurchase()" class="w-full py-8 btn-primary rounded-[2.5rem] font-black text-2xl uppercase tracking-widest">Establish Connection</button>
-            </div>
+        <div class="glass-panel p-12 rounded-[4rem] max-w-md w-full mx-4 relative border border-white/10 text-center">
+            <h2 class="text-4xl font-black uppercase mb-8">Secure <span class="gradient-text">Studio</span></h2>
+            <button onclick="handleIDBPremiumPurchase()" class="w-full py-6 btn-primary rounded-[2rem] font-black text-xl uppercase tracking-widest">Unlock PRO</button>
+            <button onclick="closeModal('payment-modal')" class="mt-4 text-xs text-gray-500 uppercase font-bold tracking-widest">Zrušiť</button>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-12 right-12 glass-panel px-12 py-8 rounded-[3rem] hidden transform translate-y-40 transition-all duration-700 flex items-center gap-8 z-[2000] border border-white/10 shadow-2xl">
-        <div id="toast-icon" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"></div>
-        <div id="toast-msg" class="font-black text-sm uppercase"></div>
+    <div id="toast" class="fixed bottom-12 right-12 glass-panel px-10 py-6 rounded-[2rem] hidden transform translate-y-40 transition-all duration-500 flex items-center gap-6 z-[2000] border border-white/10">
+        <div id="toast-icon" class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner"></div>
+        <div id="toast-msg" class="font-black text-[10px] uppercase"></div>
     </div>
 
     <script>
@@ -425,9 +320,9 @@
 
         async function initIndexedDB() {
             return new Promise((resolve) => {
-                const req = indexedDB.open(DB_NAME, 7);
+                const req = indexedDB.open(DB_NAME, 8);
                 req.onupgradeneeded = (e) => {
-                    const db = event.target.result;
+                    const db = e.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
                 };
                 req.onsuccess = (e) => { db = e.target.result; resolve(db); };
@@ -451,7 +346,7 @@
             });
         }
 
-        // --- STATE ---
+        // --- CORE STATE ---
         let isPremium = false, audioContext, analyser, dataArray, source, audioStreamDest, 
             isPlaying = false, animationId, mediaRecorder, recordedChunks = [], isRecording = false, 
             bgType = 'none', isAppMode = false, currentFormat = 'video';
@@ -480,7 +375,6 @@
             const savedFormat = await getFromDB('projectFormat');
             if(savedFormat) setFormat(savedFormat);
 
-            initLabItems();
             resizeCanvas();
             drawLoop();
             setInterval(syncPremiumStatus, 30000);
@@ -491,15 +385,15 @@
             const settings = await getFromDB('visualSettings');
             if (settings) {
                 vizColor = settings.color || '#00ff42'; vizScale = settings.scale || 1.0; bassGain = settings.bassGain || 0;
-                colorPicker.value = vizColor; document.getElementById('color-hex').innerText = vizColor;
-                scaleSlider.value = vizScale; document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
-                bassSlider.value = bassGain; document.getElementById('bass-val').innerText = `+${bassGain} dB`;
+                colorPicker.value = vizColor; scaleSlider.value = vizScale; bassSlider.value = bassGain;
+                document.getElementById('bass-val').innerText = `+${bassGain} dB`;
+                document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x';
             }
         }
 
         async function saveStudioSettings() { await saveToDB('visualSettings', { color: vizColor, scale: vizScale, bassGain: bassGain }); }
 
-        colorPicker.oninput = (e) => { vizColor = e.target.value; document.getElementById('color-hex').innerText = vizColor; saveStudioSettings(); };
+        colorPicker.oninput = (e) => { vizColor = e.target.value; saveStudioSettings(); };
         scaleSlider.oninput = (e) => { vizScale = parseFloat(e.target.value); document.getElementById('scale-val').innerText = vizScale.toFixed(2) + 'x'; saveStudioSettings(); };
         bassSlider.oninput = (e) => { bassGain = parseFloat(e.target.value); document.getElementById('bass-val').innerText = `+${bassGain} dB`; if (bassFilter) bassFilter.gain.value = bassGain; saveStudioSettings(); };
 
@@ -507,47 +401,27 @@
         window.setFormat = async (format) => {
             currentFormat = format;
             const area = document.getElementById('capture-area');
-            const btnVideo = document.getElementById('btn-ratio-video');
-            const btnShorts = document.getElementById('btn-ratio-shorts');
-            const statFormat = document.getElementById('stat-format');
+            const bV = document.getElementById('btn-ratio-video');
+            const bS = document.getElementById('btn-ratio-shorts');
 
             area.classList.remove('ratio-standard', 'ratio-shorts');
-            btnVideo.classList.remove('format-btn-active');
-            btnShorts.classList.remove('format-btn-active');
+            bV.classList.remove('format-btn-active');
+            bS.classList.remove('format-btn-active');
 
-            if (format === 'video') {
-                area.classList.add('ratio-standard');
-                btnVideo.classList.add('format-btn-active');
-                statFormat.innerText = "Standard 16:9";
-            } else {
-                area.classList.add('ratio-shorts');
-                btnShorts.classList.add('format-btn-active');
-                statFormat.innerText = "Shorts 9:16";
-            }
+            if (format === 'video') { area.classList.add('ratio-standard'); bV.classList.add('format-btn-active'); }
+            else { area.classList.add('ratio-shorts'); bS.classList.add('format-btn-active'); }
 
             await saveToDB('projectFormat', format);
             setTimeout(resizeCanvas, 300);
         };
 
-        // --- APP MODE LOGIC ---
-        window.toggleAppMode = async () => {
-            isAppMode = !isAppMode;
-            setAppMode(isAppMode);
-            await saveToDB('appMode', isAppMode);
-            showToast(isAppMode ? "MOBILE APP MODE ON" : "DESKTOP STUDIO MODE ON", "success");
-        };
+        window.toggleAppMode = async () => { isAppMode = !isAppMode; setAppMode(isAppMode); await saveToDB('appMode', isAppMode); };
 
         function setAppMode(active) {
             const body = document.getElementById('main-body');
-            const btn = document.getElementById('app-mode-btn');
             isAppMode = active;
-            if (active) {
-                body.classList.add('app-mode-active');
-                btn.classList.add('text-cyan-400', 'bg-cyan-500/10');
-            } else {
-                body.classList.remove('app-mode-active');
-                btn.classList.remove('text-cyan-400', 'bg-cyan-500/10');
-            }
+            if (active) body.classList.add('app-mode-active');
+            else body.classList.remove('app-mode-active');
             setTimeout(resizeCanvas, 600);
         }
 
@@ -555,27 +429,11 @@
             const target = document.getElementById('mobile-settings-target');
             const source = document.querySelector('.xl\\:col-span-3');
             target.innerHTML = source.innerHTML;
-            
-            const clonedColor = target.querySelector('#viz-color-picker');
-            const clonedScale = target.querySelector('#viz-scale-slider');
-            const clonedBass = target.querySelector('#bass-boost-slider');
-            const clonedFile = target.querySelector('#file-input');
-            const clonedStyle = target.querySelector('#viz-style');
-            const clonedRec = target.querySelector('#record-btn');
-
-            if(clonedColor) clonedColor.oninput = colorPicker.oninput;
-            if(clonedScale) clonedScale.oninput = scaleSlider.oninput;
-            if(clonedBass) clonedBass.oninput = bassSlider.oninput;
-            if(clonedFile) clonedFile.onchange = fileInput.onchange;
-            if(clonedStyle) clonedStyle.onchange = (e) => { document.getElementById('viz-style').value = e.target.value; };
-            if(clonedRec) clonedRec.onclick = toggleRecording;
-
             document.getElementById('mobile-menu').style.display = 'flex';
         };
 
         window.closeMobileMenu = () => document.getElementById('mobile-menu').style.display = 'none';
 
-        // --- ENGINE & RENDER ---
         async function syncPremiumStatus() {
             const profile = await getFromDB('userProfile');
             const now = Date.now();
@@ -589,22 +447,17 @@
         }
 
         window.handleIDBPremiumPurchase = async () => {
-            const btn = event.target; btn.innerText = "Encrypting..."; btn.disabled = true;
-            setTimeout(async () => {
-                const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
-                await saveToDB('userProfile', { isPremium: true, expiryDate: expiry });
-                await syncPremiumStatus();
-                closeModal('payment-modal');
-                showToast("STUDIO UPGRADE SUCCESSFUL", "success");
-                btn.innerText = "Establish Connection"; btn.disabled = false;
-            }, 2000);
+            const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+            await saveToDB('userProfile', { isPremium: true, expiryDate: expiry });
+            await syncPremiumStatus();
+            closeModal('payment-modal');
+            showToast("ULTRA ACCESS ACTIVATED", "success");
         };
 
         window.onresize = resizeCanvas;
         window.showSection = (id) => {
             ['studio-section', 'marketplace-section', 'pricing-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(id + '-section').classList.remove('hidden');
-            window.scrollTo({top: 0, behavior: 'smooth'});
         };
         window.openModal = (id) => document.getElementById(id).style.display = 'flex';
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
@@ -612,29 +465,21 @@
         function resizeCanvas() {
             const container = document.getElementById('capture-area');
             if (container) {
-                const dpr = window.devicePixelRatio || 2;
+                // Adaptive Performance Scale
+                const isMobile = window.innerWidth < 768;
+                const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
                 canvas.width = container.clientWidth * dpr;
                 canvas.height = container.clientHeight * dpr;
-                ctx.scale(dpr, dpr);
-            }
-        }
-
-        function initLabItems() {
-            const grid = document.getElementById('packages-grid'); if (!grid) return;
-            for(let i=1; i<=15; i++) {
-                const div = document.createElement('div');
-                div.className = 'glass-panel p-10 rounded-[3rem] flex flex-col items-center cursor-pointer hover:-translate-y-2 transition-all';
-                div.innerHTML = `<div class="w-full aspect-square rounded-3xl mb-8 bg-white/5 flex items-center justify-center border border-white/5"><i class="fas fa-atom text-3xl text-cyan-500/20"></i></div><h4 class="text-[10px] font-black uppercase mb-4 text-gray-500">Preset #${i}</h4><span class="text-white text-2xl font-black">€${(Math.random() * 20 + 10).toFixed(2)}</span>`;
-                grid.appendChild(div);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
         }
 
         fileInput.onchange = (e) => {
             const file = e.target.files[0]; if (!file) return;
             const url = URL.createObjectURL(file);
-            if (file.type.startsWith('audio/')) { audio.src = url; showToast("HD AUDIO LOADED", "success"); }
-            else if (file.type.startsWith('video/')) { hiddenVideo.src = url; bgType = 'video'; hiddenVideo.play(); showToast("VIDEO LAYER READY", "success"); }
-            else if (file.type.startsWith('image/')) { hiddenImg.src = url; bgType = 'image'; showToast("IMAGE LAYER SET", "success"); }
+            if (file.type.startsWith('audio/')) { audio.src = url; showToast("AUDIO INJECTED", "success"); }
+            else if (file.type.startsWith('video/')) { hiddenVideo.src = url; bgType = 'video'; hiddenVideo.play(); }
+            else if (file.type.startsWith('image/')) { hiddenImg.src = url; bgType = 'image'; }
             if (!audioContext) initStudioEngine();
         };
 
@@ -653,7 +498,7 @@
         }
 
         window.togglePlay = () => {
-            if (!audio.src) return showToast("CHÝBA ZDROJ", "error");
+            if (!audio.src) return showToast("NO SOURCE", "error");
             if (audioContext?.state === 'suspended') audioContext.resume();
             if (isPlaying) audio.pause(); else audio.play();
             isPlaying = !isPlaying;
@@ -668,11 +513,11 @@
         audio.onended = () => { if (isRecording) stopRecording(); isPlaying = false; document.getElementById('play-icon').className = 'fas fa-play'; };
 
         function formatTime(s) {
-            const m = Math.floor(s / 60); const sec = Math.floor(s % 60);
-            return `00:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const sec = Math.floor(s % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
-        window.toggleRecording = () => { if (!audio.src) return showToast("ŽIADNE AUDIO", "error"); if (!isRecording) startRecording(); else stopRecording(); };
+        window.toggleRecording = () => { if (!audio.src) return showToast("NO AUDIO", "error"); if (!isRecording) startRecording(); else stopRecording(); };
 
         function startRecording() {
             isRecording = true; recordedChunks = [];
@@ -681,45 +526,49 @@
             mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
             mediaRecorder.onstop = () => {
                 const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }));
-                a.download = `SonicUltra_Studio_Render_${Date.now()}.webm`; a.click();
-                showToast("RENDER COMPLETE", "success");
+                a.download = `SonicUltra_Render_${Date.now()}.webm`; a.click();
             };
             mediaRecorder.start();
             document.getElementById('recording-status').classList.remove('hidden');
-            document.getElementById('record-btn').classList.add('bg-red-500/15', 'border-red-500/30');
             if (!isPlaying) togglePlay();
         }
 
         function stopRecording() {
             isRecording = false; if (mediaRecorder) mediaRecorder.stop();
             document.getElementById('recording-status').classList.add('hidden');
-            document.getElementById('record-btn').classList.remove('bg-red-500/15', 'border-red-500/30');
         }
 
+        // --- OPTIMIZED DRAW LOOP ---
         function drawLoop() {
             animationId = requestAnimationFrame(drawLoop);
+            
+            // Skip rendering if not playing or recording to save resources
+            if(!isPlaying && !isRecording) return;
+            
             if(analyser) analyser.getByteFrequencyData(dataArray);
 
-            const dpr = window.devicePixelRatio || 2;
+            const dpr = window.devicePixelRatio || 1;
             const w = canvas.width / dpr, h = canvas.height / dpr, centerX = w / 2, centerY = h / 2;
 
-            ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
-            ctx.clearRect(0, 0, w, h); ctx.fillStyle = "#020202"; ctx.fillRect(0, 0, w, h);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowBlur = 0;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#020202";
+            ctx.fillRect(0, 0, w, h);
 
-            ctx.save(); ctx.globalAlpha = 0.90; 
+            // Background
+            ctx.save();
+            ctx.globalAlpha = 0.90; 
             if (bgType === 'video' && hiddenVideo.readyState >= 2) {
-                // Cover background logic
-                const ratio = w / h;
                 const vRatio = hiddenVideo.videoWidth / hiddenVideo.videoHeight;
                 let dw, dh, dx, dy;
-                if (ratio > vRatio) { dw = w; dh = w / vRatio; dx = 0; dy = (h - dh) / 2; }
+                if ((w / h) > vRatio) { dw = w; dh = w / vRatio; dx = 0; dy = (h - dh) / 2; }
                 else { dh = h; dw = h * vRatio; dx = (w - dw) / 2; dy = 0; }
                 ctx.drawImage(hiddenVideo, dx, dy, dw, dh);
             } else if (bgType === 'image' && hiddenImg.complete) {
-                const ratio = w / h;
                 const iRatio = hiddenImg.naturalWidth / hiddenImg.naturalHeight;
                 let dw, dh, dx, dy;
-                if (ratio > iRatio) { dw = w; dh = w / iRatio; dx = 0; dy = (h - dh) / 2; }
+                if ((w / h) > iRatio) { dw = w; dh = w / iRatio; dx = 0; dy = (h - dh) / 2; }
                 else { dh = h; dw = h * iRatio; dx = (w - dw) / 2; dy = 0; }
                 ctx.drawImage(hiddenImg, dx, dy, dw, dh);
             }
@@ -731,31 +580,36 @@
             if (style.startsWith('pro-') && !isPremium) {
                 ctx.fillStyle = "rgba(0,0,0,0.96)"; ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = "#00f2fe"; ctx.font = "900 24px 'Plus Jakarta Sans'"; ctx.textAlign = "center";
-                ctx.fillText("UNLOCK STUDIO ACCESS", centerX, centerY);
+                ctx.fillText("UNLOCK ULTRA STUDIO ACCESS", centerX, centerY);
                 return;
             }
 
-            ctx.save(); ctx.globalCompositeOperation = 'lighter';
-            // Scale adaptivity based on orientation
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
             const responsiveScale = (currentFormat === 'shorts' ? 0.6 : 1.0) * vizScale;
 
             if (style === 'pro-ultra-circle') {
                 const bassValue = (dataArray[1] + dataArray[2] + dataArray[3]) / 3;
                 const bassResponse = (bassValue / 255) * 60 * responsiveScale;
                 const baseRadius = (160 * responsiveScale) + bassResponse;
+                
+                // Optimized core ring with shadow
                 ctx.shadowBlur = 40; ctx.shadowColor = vizColor; ctx.strokeStyle = vizColor; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2); ctx.stroke();
-                for (let i = 0; i < dataArray.length; i += 2) {
+
+                // Optimized fibers (no shadow for speed)
+                ctx.shadowBlur = 0;
+                const fiberStep = window.innerWidth < 768 ? 4 : 2; // Fewer fibers on mobile
+                for (let i = 0; i < dataArray.length; i += fiberStep) {
                     const angle = (i / dataArray.length) * Math.PI * 2 + (Date.now() / 2500);
                     const magnitude = dataArray[i];
-                    for (let j = 0; j < 6; j++) {
-                        const jitterAngle = angle + (Math.random() - 0.5) * 0.15;
-                        const fuzzyLen = (magnitude / 255) * 140 * responsiveScale * Math.random();
-                        ctx.beginPath(); ctx.moveTo(centerX + Math.cos(jitterAngle) * baseRadius, centerY + Math.sin(jitterAngle) * baseRadius);
-                        ctx.lineTo(centerX + Math.cos(jitterAngle) * (baseRadius + fuzzyLen), centerY + Math.sin(jitterAngle) * (baseRadius + fuzzyLen));
-                        ctx.strokeStyle = vizColor; ctx.globalAlpha = (Math.random() * 0.4) + 0.1;
-                        ctx.lineWidth = 1 + Math.random() * 1.5; ctx.stroke();
-                    }
+                    const fuzzyLen = (magnitude / 255) * 140 * responsiveScale;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + Math.cos(angle) * baseRadius, centerY + Math.sin(angle) * baseRadius);
+                    ctx.lineTo(centerX + Math.cos(angle) * (baseRadius + fuzzyLen), centerY + Math.sin(angle) * (baseRadius + fuzzyLen));
+                    ctx.strokeStyle = vizColor; ctx.globalAlpha = 0.2; ctx.lineWidth = 1.5;
+                    ctx.stroke();
                 }
             } else if (style === 'pro-triangle') {
                 ctx.save(); ctx.translate(centerX, centerY);
@@ -772,19 +626,18 @@
                 ctx.restore();
             } else if (style === 'circle') {
                 const r = 220 * responsiveScale; ctx.shadowBlur = 20; ctx.shadowColor = vizColor;
-                for(let i=0; i<dataArray.length; i++) {
+                for(let i=0; i<dataArray.length; i += 2) {
                     const bh = (dataArray[i]/255)*160*responsiveScale; const a = (i/dataArray.length)*Math.PI*2;
-                    const x1 = centerX+Math.cos(a)*r; const y1 = centerY+Math.sin(a)*r;
-                    const x2 = centerX+Math.cos(a)*(r+bh); const y2 = centerY+Math.sin(a)*(r+bh);
-                    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+                    ctx.beginPath();
+                    ctx.moveTo(centerX+Math.cos(a)*r, centerY+Math.sin(a)*r);
+                    ctx.lineTo(centerX+Math.cos(a)*(r+bh), centerY+Math.sin(a)*(r+bh));
                     ctx.strokeStyle = vizColor; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
                 }
             } else {
                 const bw = (w/dataArray.length);
                 for(let i=0; i<dataArray.length; i++) {
                     const bh = (dataArray[i]/255)*(h * 0.4);
-                    ctx.fillStyle = vizColor; ctx.shadowBlur = 15; ctx.shadowColor = vizColor;
-                    ctx.fillRect(i*bw, h-bh, bw-1, bh);
+                    ctx.fillStyle = vizColor; ctx.fillRect(i*bw, h-bh, bw-1, bh);
                 }
             }
             ctx.restore();
@@ -794,10 +647,10 @@
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
             document.getElementById('toast-msg').innerText = msg;
-            icon.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${type==='success'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}`;
+            icon.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${type==='success'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}`;
             icon.innerHTML = `<i class="fas fa-${type==='success'?'check':'bolt-lightning'}"></i>`;
             toast.classList.remove('hidden'); setTimeout(() => toast.classList.remove('translate-y-40'), 10);
-            setTimeout(() => { toast.classList.add('translate-y-40'); setTimeout(() => toast.classList.add('hidden'), 700); }, 4000);
+            setTimeout(() => { toast.classList.add('translate-y-40'); setTimeout(() => toast.classList.add('hidden'), 500); }, 4000);
         }
     </script>
 </body>
